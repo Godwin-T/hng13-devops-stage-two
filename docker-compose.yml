@@ -6,15 +6,15 @@ services:
     restart: unless-stopped
     environment:
       RELEASE_ID: "${RELEASE_ID_BLUE}"
-      PORT: "${PORT:-3000}"
+      PORT: "3000"
     expose:
-      - "${PORT:-3000}"
+      - "3000"
     ports:
-      - target: "${PORT:-3000}"
+      - target: "3000"
         published: 8081
         protocol: tcp
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-3000}/healthz || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/healthz || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 3
@@ -25,15 +25,15 @@ services:
     restart: unless-stopped
     environment:
       RELEASE_ID: "${RELEASE_ID_GREEN}"
-      PORT: "${PORT:-3000}"
+      PORT: "3000"
     expose:
-      - "${PORT:-3000}"
+      - "3000"
     ports:
-      - target: "${PORT:-3000}"
+      - target: "3000"
         published: 8082
         protocol: tcp
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-3000}/healthz || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/healthz || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 3
