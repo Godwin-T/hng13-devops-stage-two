@@ -1,0 +1,63 @@
+name: Verify Blue-Green Failover
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      BLUE_IMAGE: ${{ vars.BLUE_IMAGE }}
+      GREEN_IMAGE: ${{ vars.GREEN_IMAGE }}
+      ACTIVE_POOL: ${{ vars.ACTIVE_POOL }}
+      RELEASE_ID_BLUE: ${{ vars.RELEASE_ID_BLUE }}
+      RELEASE_ID_GREEN: ${{ vars.RELEASE_ID_GREEN }}
+      PORT: ${{ vars.PORT }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required variables
+        run: |
+          missing=0
+          for var in BLUE_IMAGE GREEN_IMAGE ACTIVE_POOL RELEASE_ID_BLUE RELEASE_ID_GREEN; do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::Environment variable ${var} is required but not set."
+              missing=1
+            fi
+          done
+          if [ "${missing}" -eq 1 ]; then
+            exit 1
+          fi
+
+      - name: Create .env for docker compose
+        run: |
+          cat <<EOF > .env
+          BLUE_IMAGE=${BLUE_IMAGE}
+          GREEN_IMAGE=${GREEN_IMAGE}
+          ACTIVE_POOL=${ACTIVE_POOL}
+          RELEASE_ID_BLUE=${RELEASE_ID_BLUE}
+          RELEASE_ID_GREEN=${RELEASE_ID_GREEN}
+          EOF
+          if [ -n "${PORT:-}" ]; then
+            echo "PORT=${PORT}" >> .env
+          fi
+
+      - name: Launch stack
+        run: docker compose up -d
+
+      - name: Verify automatic failover
+        run: ./scripts/verify_failover.sh
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down -v

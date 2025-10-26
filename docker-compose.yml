@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  app_blue:
+    image: "${BLUE_IMAGE}"
+    restart: unless-stopped
+    environment:
+      RELEASE_ID: "${RELEASE_ID_BLUE}"
+      PORT: "${PORT:-3000}"
+    expose:
+      - "${PORT:-3000}"
+    ports:
+      - target: "${PORT:-3000}"
+        published: 8081
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-3000}/healthz || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+
+  app_green:
+    image: "${GREEN_IMAGE}"
+    restart: unless-stopped
+    environment:
+      RELEASE_ID: "${RELEASE_ID_GREEN}"
+      PORT: "${PORT:-3000}"
+    expose:
+      - "${PORT:-3000}"
+    ports:
+      - target: "${PORT:-3000}"
+        published: 8082
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-3000}/healthz || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+
+  nginx:
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    depends_on:
+      app_blue:
+        condition: service_healthy
+      app_green:
+        condition: service_healthy
+    environment:
+      ACTIVE_POOL: "${ACTIVE_POOL}"
+      RELEASE_ID_BLUE: "${RELEASE_ID_BLUE}"
+      RELEASE_ID_GREEN: "${RELEASE_ID_GREEN}"
+      PORT: "${PORT:-3000}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/entrypoint.sh:/usr/local/bin/nginx-entrypoint.sh:ro
+    entrypoint: ["/usr/local/bin/nginx-entrypoint.sh"]
