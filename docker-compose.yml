@@ -14,7 +14,11 @@ services:
         published: 8081
         protocol: tcp
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/healthz || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"const http=require('http');http.get('http://127.0.0.1:3000/healthz',res=>{process.exit(res.statusCode===200?0:1);}).on('error',()=>process.exit(1));\"",
+        ]
       interval: 20s
       timeout: 5s
       retries: 3
@@ -33,7 +37,11 @@ services:
         published: 8082
         protocol: tcp
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/healthz || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"const http=require('http');http.get('http://127.0.0.1:3000/healthz',res=>{process.exit(res.statusCode===200?0:1);}).on('error',()=>process.exit(1));\"",
+        ]
       interval: 20s
       timeout: 5s
       retries: 3
