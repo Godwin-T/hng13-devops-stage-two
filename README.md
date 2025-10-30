@@ -59,6 +59,15 @@ The script waits for the baseline state, injects chaos on the active pool, and e
 For alert handling guidance (failovers, high error rates, maintenance mode), see
 [`RUNBOOK.md`](RUNBOOK.md).
 
+## Alert & Log Samples
+
+1. Slack Alert – Failover Event  
+   ![Slack Failover Alert](assets/failover.png)
+2. Slack Alert – High Error Rate  
+   ![Slack High Error Rate Alert](assets/highErrorRate.png)
+3. Container Logs  
+   ![Container Log Output](assets/nginx_logs.png)
+
 ## Continuous integration
 A GitHub Actions workflow (`.github/workflows/verify.yml`) launches the compose stack, runs the verification script, and collects logs on failure. Configure the following repository variables or secrets so the workflow can populate `.env`:
 - `BLUE_IMAGE`
