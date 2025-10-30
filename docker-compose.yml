@@ -67,4 +67,24 @@ services:
     volumes:
       - ./nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
       - ./nginx/entrypoint.sh:/usr/local/bin/nginx-entrypoint.sh:ro
+      - nginx_logs:/var/log/nginx
     entrypoint: ["/usr/local/bin/nginx-entrypoint.sh"]
+
+  alert_watcher:
+    build:
+      context: ./alert-watcher
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    environment:
+      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
+      ALERT_ERROR_WINDOW: "${ALERT_ERROR_WINDOW:-200}"
+      ALERT_ERROR_THRESHOLD: "${ALERT_ERROR_THRESHOLD:-0.02}"
+      ALERT_COOLDOWN_SECONDS: "${ALERT_COOLDOWN_SECONDS:-300}"
+      MAINTENANCE_FLAG_FILE: "${MAINTENANCE_FLAG_FILE:-/var/run/maintenance.on}"
+      PRIMARY_POOL: "${ACTIVE_POOL}"
+    volumes:
+      - nginx_logs:/var/log/nginx:ro
+
+volumes:
+  nginx_logs:

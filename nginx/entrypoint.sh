@@ -26,6 +26,8 @@ esac
 export PRIMARY_UPSTREAM_SERVER
 export BACKUP_UPSTREAM_SERVER
 
+mkdir -p /var/log/nginx
+
 envsubst '${PRIMARY_UPSTREAM_SERVER} ${BACKUP_UPSTREAM_SERVER}' < "${TEMPLATE_PATH}" > "${OUTPUT_PATH}"
 
 nginx -t

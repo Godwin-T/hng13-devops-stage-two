@@ -16,6 +16,9 @@ This repository provisions a blue/green deployment of pre-built Node.js services
    - `GREEN_IMAGE` – image for the green pool
    - `ACTIVE_POOL` – `blue` or `green` (controls which pool is primary)
    - `RELEASE_ID_BLUE`, `RELEASE_ID_GREEN` – release identifiers returned by each service
+   - `SLACK_WEBHOOK_URL` – incoming webhook for Slack alerts
+   - Optional alert tuning variables (`ALERT_ERROR_WINDOW`, `ALERT_ERROR_THRESHOLD`,
+     `ALERT_COOLDOWN_SECONDS`, `MAINTENANCE_FLAG_FILE`)
    - Optional `PORT` if the application inside the containers listens on a non-default port (defaults to 3000)
 
 ## Running the stack
@@ -50,6 +53,11 @@ The script `scripts/verify_failover.sh` automates the scenario above. Run it aft
 ./scripts/verify_failover.sh
 ```
 The script waits for the baseline state, injects chaos on the active pool, and ensures that >=95% of responses during the test window come from the standby pool with no non-200 statuses.
+
+## Operations Runbook
+
+For alert handling guidance (failovers, high error rates, maintenance mode), see
+[`RUNBOOK.md`](RUNBOOK.md).
 
 ## Continuous integration
 A GitHub Actions workflow (`.github/workflows/verify.yml`) launches the compose stack, runs the verification script, and collects logs on failure. Configure the following repository variables or secrets so the workflow can populate `.env`:
